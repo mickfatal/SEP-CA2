@@ -26,6 +26,51 @@
                 console.log(error);
             });
 
+            //fetch member details
+            var email = sessionStorage.getItem("memberEmail");
+            fetch('/api/getMember?' + new URLSearchParams({
+                email: email
+            }), {
+                method:'GET', 
+                headers: {
+                        Authorization: 'Bearer ' + authToken
+                }
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data){
+                if (data == null || data == ''){
+                    console.log("Error");
+                } else {
+                    var email = data.email;
+                    var name = data.name;
+                    var phone = data.phone;
+                    var city = data.city;
+                    var address = data.address;
+                    var securityQuestion = data.securityQuestion;
+                    var securityAnswer = data.securityAnswer;
+                    var age = data.age;
+                    var income = data.income;
+                    var slaservice = data.sla;
+
+                    document.getElementById("email").setAttribute('placeholder',email);
+                    document.getElementById("name").setAttribute('placeholder',name);
+                    document.getElementById("phone").setAttribute('placeholder',phone);
+                    document.getElementById("address").setAttribute('placeholder',address);
+                    document.getElementById("securityAnswer").setAttribute('placeholder',securityAnswer);
+                    document.getElementById("age").setAttribute('placeholder',age);
+                    document.getElementById("income").setAttribute('placeholder',income);
+                    if (slaservice == 0){
+                        document.getElementById("serviceLevelAgreement").setAttribute('checked', 'unchecked');
+                    } else {
+                        document.getElementById("serviceLevelAgreement").setAttribute('checked', 'checked');
+                    }
+                    document.querySelector(`[value="${securityQuestion}"]`).setAttribute('selected','selected');
+                    document.querySelector(`[value="${city}"]`).setAttribute('selected','selected');
+                }
+            }).catch(function (error){
+                console.log(error);
+            })
+
             var member = null;
             document.addEventListener('DOMContentLoaded', function(){
                 member = JSON.parse(sessionStorage.getItem("member"));
