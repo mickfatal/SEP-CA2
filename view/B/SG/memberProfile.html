@@ -52,13 +52,13 @@
                     var income = data.income;
                     var slaservice = data.sla;
 
-                    document.getElementById("email").setAttribute('placeholder',email);
-                    document.getElementById("name").setAttribute('placeholder',name);
-                    document.getElementById("phone").setAttribute('placeholder',phone);
-                    document.getElementById("address").setAttribute('placeholder',address);
-                    document.getElementById("securityAnswer").setAttribute('placeholder',securityAnswer);
-                    document.getElementById("age").setAttribute('placeholder',age);
-                    document.getElementById("income").setAttribute('placeholder',income);
+                    document.getElementById("email").setAttribute('value',email);
+                    document.getElementById("name").setAttribute('value',name);
+                    document.getElementById("phone").setAttribute('value',phone);
+                    document.getElementById("address").setAttribute('value',address);
+                    document.getElementById("securityAnswer").setAttribute('value',securityAnswer);
+                    document.getElementById("age").setAttribute('value',age);
+                    document.getElementById("income").setAttribute('value',income);
                     if (slaservice == 0){
                         document.getElementById("serviceLevelAgreement").setAttribute('checked', 'unchecked');
                     } else {
