@@ -26,6 +26,51 @@
                 console.log(error);
             });
 
+            //fetch member details
+            var email = sessionStorage.getItem("memberEmail");
+            fetch('/api/getMember?' + new URLSearchParams({
+                email: email
+            }), {
+                method:'GET', 
+                headers: {
+                        Authorization: 'Bearer ' + authToken
+                }
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data){
+                if (data == null || data == ''){
+                    console.log("Error");
+                } else {
+                    var email = data.email;
+                    var name = data.name;
+                    var phone = data.phone;
+                    var city = data.city;
+                    var address = data.address;
+                    var securityQuestion = data.securityQuestion;
+                    var securityAnswer = data.securityAnswer;
+                    var age = data.age;
+                    var income = data.income;
+                    var slaservice = data.sla;
+
+                    document.getElementById("email").setAttribute('value',email);
+                    document.getElementById("name").setAttribute('value',name);
+                    document.getElementById("phone").setAttribute('value',phone);
+                    document.getElementById("address").setAttribute('value',address);
+                    document.getElementById("securityAnswer").setAttribute('value',securityAnswer);
+                    document.getElementById("age").setAttribute('value',age);
+                    document.getElementById("income").setAttribute('value',income);
+                    if (slaservice == 0){
+                        document.getElementById("serviceLevelAgreement").setAttribute('checked', 'unchecked');
+                    } else {
+                        document.getElementById("serviceLevelAgreement").setAttribute('checked', 'checked');
+                    }
+                    document.querySelector(`[value="${securityQuestion}"]`).setAttribute('selected','selected');
+                    document.querySelector(`[value="${city}"]`).setAttribute('selected','selected');
+                }
+            }).catch(function (error){
+                console.log(error);
+            })
+
             var member = null;
             document.addEventListener('DOMContentLoaded', function(){
                 member = JSON.parse(sessionStorage.getItem("member"));
@@ -44,7 +89,7 @@
                 })).then(function (response) {
                     return response.json();
                 }).then(function (boughtItem) {
-                    if(boughtItem == null || boughtItem == '') { //if member do not have any bought items
+                    if(boughtItem == null || boughtItem ===0) { //if member do not have any bought items
                         document.getElementById("salesHistoryTab").innerHTML = '<h5 class="center">You do not have any sales history.</h5>';
                     }
                     else {
@@ -53,33 +98,28 @@
                         var overallPrice = 0;
                         var finalPrice = 0;
                         //get all order IDs
-                        for (i = 0; i < boughtItem.length; i++) {
-                            orderIdList[i] = boughtItem[i].id;
+                        for (var i = 0; i < boughtItem.length; i++) {
+                            orderIdList.push(boughtItem[i].id);
                         }
                         //unduplicate order IDs
                         orderIdList = [...new Set(orderIdList)];
-                        var temp;
-                        var size = orderIdList.length;
+                        orderIdList.sort(function(a,b){
+                            return a-b;
+                        });
                         //sort order ID in ascending order
-                        for (i = 0; i < size - 1; i++) {
-                            for (j = 0; j < size - i - 1; j++) {
-                                if (orderIdList[j] > orderIdList[j+1]) {
-                                    temp = orderIdList[j];
-                                    orderIdList[j] = orderIdList[j+1];
-                                    orderIdList[j+1] = temp;
-                                }
-                            }
-                        }
+                        for(var orderIndex=0;orderIndex<orderIdList.length;orderIndex++){
+                            var orderId=orderIdList[orderIndex];
+                        
                                          
-                            htmlTxt += '<h5>Order #' + (1) + '</h5>';
+                            htmlTxt += '<h5>Order #' + (orderIndex + 1) + '</h5>';
                             var counter = 0;
                             //get bought items by order ID
                             for (j = 0; j < boughtItem.length; j++) {
                             
-                                if(boughtItem[j].id == orderIdList[0]) {
+                                if(boughtItem[j].id == orderId) {
                                     var item = boughtItem[j];
                                     //display top level info
-                                    if(counter == 0) {
+                                    if(counter === 0) {
                                         let options = {
                                             weekday: "long", year: "numeric", month: "long",  
                                             day: "numeric", hour: "2-digit", minute: "2-digit"  
@@ -98,6 +138,7 @@
                                     }
                                 }
                             }
+                        
                             //display table info
                             htmlTxt += '\
                                 <div class="row">\
@@ -119,7 +160,7 @@
                                                             <tbody>';
                             for (y = 0; y < boughtItem.length; y++) {
                             
-                                if (boughtItem[y].id == orderIdList[0]) {
+                                if (boughtItem[y].id === orderId) {
                                     var product = boughtItem[y];
                                     htmlTxt += '\
                                         <tr class="cart_table_item">\
@@ -162,11 +203,12 @@
                                     </div>\
                                 </div>';
                             finalPrice = 0;
-
-                        htmlTxt += '<h4 style="font-weight: bold; padding-left: 20px">Total Amount Spent: $'+ overallPrice + '</h4>';
+                        }
+                        htmlTxt += '<h4 style="font-weight: bold; padding-left: 20px">Total Amount Spent: $'+ overallPrice.toFixed(2) + '</h4>';
                         document.getElementById("salesHistoryTab").innerHTML = htmlTxt;
-                    }
-                }).catch(function(error) {
+                  
+              }
+              }).catch(function(error) {
                     console.log(error);
                 });
             }, false);
