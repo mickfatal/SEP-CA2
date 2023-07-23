@@ -233,96 +233,128 @@
             return startDate.toLocaleDateString("en-US", options);
         }
 
+        // This function handles form submission.
         async function submitForm() {
+
+            // Retrieving the old, new, and confirmation password values from the form.
             var oldPassword = document.getElementById('oldPassword').value;
             var password = document.getElementById("password").value;
             var repassword = document.getElementById("repassword").value;
+
+            // Variable to hold the status of the password verification process.
             var ok = true;
 
+            // Checking the validity of the form.
             if (document.getElementById("profileForm").checkValidity()) {
-                if (oldPassword != "" && password != "" && repassword != "") {
-                    var memberData = {
-                        id: member.id,
-                        password: oldPassword
+
+                // If any password fields are filled.
+                if (oldPassword || password || repassword) {
+
+                    // If all password fields are filled.
+                    if (oldPassword != "" && password != "" && repassword != "") {
+
+                        // Constructing the data to send in the request.
+                        var memberData = {
+                            id: member.id,
+                            password: oldPassword
+                        };
+
+                        // Making a request to verify the old password.
+                        await fetch(new Request('/api/verifyPassword',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: 'Bearer ' + authToken
+                                },
+                                body: JSON.stringify(memberData)
+                            }))
+                            .then(function (response) {
+                                return response.json();
+                            })
+                            .then(async function (data) {
+
+                                // If the old password is correct.
+                                if (data.success) {
+
+                                    // If the new password and confirmation password do not match.
+                                    if (password != repassword) {
+                                        document.getElementById("password").style.borderColor = "#E34234";
+                                        document.getElementById("repassword").style.borderColor = "#E34234";
+                                        alert("New password and confirmation password do not match. Please key again.");
+                                        ok = false;
+                                    }
+                                    // If the new password is too short.
+                                    else if (password.length != 0 && password.length < 8) {
+                                        alert("New password too short. At least 8 characters required.");
+                                        ok = false;
+                                    }
+                                }
+                                // If the old password is incorrect.
+                                else {
+                                    alert("Old password is incorrect. Please try again.");
+                                    ok = false;
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                ok = false;
+                            });
+                    }
+                    // If not all password fields are filled.
+                    else {
+                        alert("All password fields must be filled in to change the password.");
+                        ok = false;
+                    }
+                }
+
+                // If the password is correct or password fields are empty, proceed to update the profile.
+                if (ok) {
+                    // Constructing the data to send in the update request.
+                    var data = {
+                        email: document.getElementById("email").value,
+                        name: document.getElementById("name").value,
+                        phone: document.getElementById("phone").value,
+                        country: document.getElementById("country").value,
+                        address: document.getElementById("address").value,
+                        securityQuestion: document.getElementById("securityQuestion").value,
+                        securityAnswer: document.getElementById("securityAnswer").value,
+                        age: document.getElementById("age").value,
+                        income: document.getElementById("income").value,
+                        sla: document.getElementById("serviceLevelAgreement").checked ? 1 : 0,
+                        password: password != "" ? password : undefined
                     };
 
-                    await fetch(new Request('/api/verifyPassword',
+                    // Making a request to update the member profile.
+                    await fetch(new Request('/api/updateMember',
                         {
-                            method: 'POST',
+                            method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json',
                                 Authorization: 'Bearer ' + authToken
                             },
-                            body: JSON.stringify(memberData)
+                            body: JSON.stringify(data)
                         }))
                         .then(function (response) {
                             return response.json();
                         })
-                        .then(async function (data) {
-                            if (data.success) {
-                                if (password != repassword) {
-                                    //Check if password and repassword is the same
-                                    document.getElementById("password").style.borderColor = "#E34234";
-                                    document.getElementById("repassword").style.borderColor = "#E34234";
-                                    alert("Passwords do not match. Please key again.");
-                                    ok = false;
-                                } else if (password == repassword) {
-                                    //Check if password length is at least 8
-                                    if (password.length != 0 && password.length < 8) {
-                                        alert("Passwords too short. At least 8 characters.");
-                                        ok = false;
-                                    }
-                                }
+                        .then(function (data) {
 
-                                // Only proceed with profile update if password checks are passed
-                                if (ok) {
-                                    var data = {
-                                        email: document.getElementById("email").value,
-                                        name: document.getElementById("name").value,
-                                        phone: document.getElementById("phone").value,
-                                        country: document.getElementById("country").value,
-                                        address: document.getElementById("address").value,
-                                        securityQuestion: document.getElementById("securityQuestion").value,
-                                        securityAnswer: document.getElementById("securityAnswer").value,
-                                        age: document.getElementById("age").value,
-                                        income: document.getElementById("income").value,
-                                        sla: document.getElementById("serviceLevelAgreement").checked ? 1 : 0,
-                                        password: document.getElementById("password").value
-                                    };
+                            // Updating session storage with the new member information.
+                            sessionStorage.setItem("member", JSON.stringify(data));
+                            sessionStorage.setItem("memberEmail", data.email);
+                            sessionStorage.setItem("memberName", data.name);
 
-                                    await fetch(new Request('/api/updateMember',
-                                        {
-                                            method: 'PUT',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                Authorization: 'Bearer ' + authToken
-                                            },
-                                            body: JSON.stringify(data)
-                                        }))
-                                        .then(function (response) {
-                                            return response.json();
-                                        })
-                                        .then(function (data) {
-                                            //update member's info in the session storage
-                                            sessionStorage.setItem("member", JSON.stringify(data));
-                                            sessionStorage.setItem("memberEmail", data.email);
-                                            sessionStorage.setItem("memberName", data.name);
-                                            var url = window.location.origin + window.location.pathname;
-                                            window.location.href = url + '?goodMsg=Successfully Updated!';
-                                        })
-                                        .catch(function (error) {
-                                            console.log(error);
-                                            var url = window.location.origin + window.location.pathname;
-                                            window.location.href = url + '?errMsg=Unable to Update.';
-                                        });
-                                }
-                            }
-                            else {
-                                alert("Old password is incorrect.");
-                            }
+                            // Redirecting to the same page with a success message.
+                            var url = window.location.origin + window.location.pathname;
+                            window.location.href = url + '?goodMsg=Successfully Updated!';
                         })
                         .catch(function (error) {
                             console.log(error);
+
+                            // Redirecting to the same page with an error message.
+                            var url = window.location.origin + window.location.pathname;
+                            window.location.href = url + '?errMsg=Unable to Update.';
                         });
                 }
             }
