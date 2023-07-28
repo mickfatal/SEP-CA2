@@ -79,22 +79,24 @@ var memberDB = {
             });
         });
     },
-    getMember: function (email) {
-        return new Promise( ( resolve, reject ) => {
-            var conn = db.getConnection();
-            conn.connect(function (err) {
-                if (err) {
-                    console.log(err);
-                    conn.end();
-                    return reject(err);
-                }
-                else {
-                    var sql = 'SELECT * FROM memberentity m WHERE m.EMAIL=?';
-                    conn.query(sql, [email], function (err, result) {
-                        if (err) {
-                            conn.end();
-                            return reject(err);
-                        } else {
+getMember: function (email) {
+    return new Promise((resolve, reject) => {
+        var conn = db.getConnection();
+        conn.connect(function (err) {
+            if (err) {
+                console.log(err);
+                conn.end();
+                return reject(err);
+            }
+            else {
+                var sql = 'SELECT * FROM memberentity m WHERE m.EMAIL=?';
+                conn.query(sql, [email], function (err, result) {
+                    if (err) {
+                        conn.end();
+                        return reject(err);
+                    } else {
+                        // Check if result[0] is defined
+                        if (result[0]) {
                             var member = new Member();
                             member.id = result[0].ID;
                             member.dob = result[0].DOB;
@@ -126,12 +128,18 @@ var memberDB = {
                             member.stripeCustomerId = result[0].STRIPECUSTOMERID;
                             conn.end();
                             return resolve(member);
+                        } else {
+                            conn.end();
+                            // Resolve with null if no member was found
+                            return resolve(null);
                         }
-                    });
-                }
-            });
+                    }
+                });
+            }
         });
-    },
+    });
+},
+
     getBoughtItem: function (id) {
         return new Promise( ( resolve, reject ) => {
             var conn = db.getConnection();
