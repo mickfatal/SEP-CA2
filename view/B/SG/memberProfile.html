@@ -27,23 +27,6 @@
                 console.log(error);
             });
 
-        
-        //fetch member details
-        var Data = sessionStorage.getItem("member");
-        if (Data){
-            var data = JSON.parse(Data);
-            var Email = data.email;
-            var Name = data.name;
-            var Phone = data.phone;
-            var City = data.city;
-            var Address = data.address;
-            var SecurityQuestion = data.securityQuestion;
-            var SecurityAnswer = data.securityAnswer;
-            var Age = data.age;
-            var Income = data.income;
-            var Slaservice = data.sla;
-        }
-
         var member = null;
         document.addEventListener('DOMContentLoaded', function () {
             member = JSON.parse(sessionStorage.getItem("member"));
@@ -707,6 +690,22 @@
     </div>
     <script src="../footer.js"></script>
     <script>
+        //fetch member details
+        var Data = sessionStorage.getItem("member");
+        function prefillDetails(Data){
+            if (Data){
+            var data = JSON.parse(Data);
+            var Email = data.email;
+            var Name = data.name;
+            var Phone = data.phone;
+            var City = data.city;
+            var Address = data.address;
+            var SecurityQuestion = data.securityQuestion;
+            var SecurityAnswer = data.securityAnswer;
+            var Age = data.age;
+            var Income = data.income;
+            var Slaservice = data.sla;
+        }
         document.getElementById("email").setAttribute('value',Email);
         document.getElementById("name").setAttribute('value',Name);
         document.getElementById("phone").setAttribute('value',Phone);
@@ -721,6 +720,9 @@
         }
         document.querySelector(`[value="${SecurityQuestion}"]`).setAttribute('selected','selected');
         document.querySelector(`[value="${City}"]`).setAttribute('selected','selected');
+        }
+
+        prefillDetails(Data);
     </script>
 </body>
 
