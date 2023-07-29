@@ -27,50 +27,22 @@
                 console.log(error);
             });
 
+        
         //fetch member details
-        var email = sessionStorage.getItem("memberEmail");
-        fetch('/api/getMember?' + new URLSearchParams({
-            email: email
-        }), {
-            method: 'GET',
-            headers: {
-                Authorization: 'Bearer ' + authToken
-            }
-        }).then(function (response) {
-            return response.json();
-        }).then(function (data) {
-            if (data == null || data == '') {
-                console.log("Error");
-            } else {
-                var email = data.email;
-                var name = data.name;
-                var phone = data.phone;
-                var city = data.city;
-                var address = data.address;
-                var securityQuestion = data.securityQuestion;
-                var securityAnswer = data.securityAnswer;
-                var age = data.age;
-                var income = data.income;
-                var slaservice = data.sla;
-
-                document.getElementById("email").setAttribute('value', email);
-                document.getElementById("name").setAttribute('value', name);
-                document.getElementById("phone").setAttribute('value', phone);
-                document.getElementById("address").setAttribute('value', address);
-                document.getElementById("securityAnswer").setAttribute('value', securityAnswer);
-                document.getElementById("age").setAttribute('value', age);
-                document.getElementById("income").setAttribute('value', income);
-                if (slaservice == 0) {
-                    document.getElementById("serviceLevelAgreement").setAttribute('checked', 'unchecked');
-                } else {
-                    document.getElementById("serviceLevelAgreement").setAttribute('checked', 'checked');
-                }
-                document.querySelector(`[value="${securityQuestion}"]`).setAttribute('selected', 'selected');
-                document.querySelector(`[value="${city}"]`).setAttribute('selected', 'selected');
-            }
-        }).catch(function (error) {
-            console.log(error);
-        })
+        var Data = sessionStorage.getItem("member");
+        if (Data){
+            var data = JSON.parse(Data);
+            var Email = data.email;
+            var Name = data.name;
+            var Phone = data.phone;
+            var City = data.city;
+            var Address = data.address;
+            var SecurityQuestion = data.securityQuestion;
+            var SecurityAnswer = data.securityAnswer;
+            var Age = data.age;
+            var Income = data.income;
+            var Slaservice = data.sla;
+        }
 
         var member = null;
         document.addEventListener('DOMContentLoaded', function () {
@@ -734,6 +706,22 @@
     </div>
     </div>
     <script src="../footer.js"></script>
+    <script>
+        document.getElementById("email").setAttribute('value',Email);
+        document.getElementById("name").setAttribute('value',Name);
+        document.getElementById("phone").setAttribute('value',Phone);
+        document.getElementById("address").setAttribute('value',Address);
+        document.getElementById("securityAnswer").setAttribute('value',SecurityAnswer);
+        document.getElementById("age").setAttribute('value',Age);
+        document.getElementById("income").setAttribute('value',Income);
+        if (Slaservice == 0){
+            document.getElementById("serviceLevelAgreement").setAttribute('checked', 'unchecked');
+        } else {
+            document.getElementById("serviceLevelAgreement").setAttribute('checked', 'checked');
+        }
+        document.querySelector(`[value="${SecurityQuestion}"]`).setAttribute('selected','selected');
+        document.querySelector(`[value="${City}"]`).setAttribute('selected','selected');
+    </script>
 </body>
 
 </html>
